@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permisos</title>
+    <script src="https://momentjs.com/downloads/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="src/js/API.js"></script>
+    
+</head>
+<body>
+    <div id="permisos">
+        <div class="container">
+            <div class="row ">
+                <div class="col">
+                    <div class="h1">
+                        Permisos
+                    </div>
+                </div>
+                <div class="col">
+
+                </div>
+            </div>
+            <div class="row">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#modalRegistro" @click="setPostPermiso()">
+                    Nuevo permiso
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <template v-if="listaPermisos && listaPermisos.length > 0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Apellidos</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col">Editar</th>
+                                    <th scope="col">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template v-for="lp in listaPermisos">
+                                    <tr>
+                                        <th scope="row">{{(listaPermisos.indexOf(lp)) + 1}}</th>
+                                        <td>{{lp.nombreEmpleado}}</td>
+                                        <td>{{lp.apellidosEmpleado}}</td>
+                                        <td>{{getMomentDate(lp.fechaPermiso)}}</td>
+                                        <td>{{lp.tipoPermisoNavigation.descripcion}}</td>
+                                        <td>
+                                            <button class="btn btn-primary" data-toggle="modal" data-target="#modalEdicion" @click="setPutPermiso(lp.id)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                    class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger" data-toggle="modal" data-target="#modalEliminar" @click="setDeletePermiso(lp.id)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template v-else>
+                        <div class="center">
+                            <div class="h4">
+                                No existen permisos registrados
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="modal fade" id="modalRegistro" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="exampleModalLabel">Editar permiso</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form @submit.prevent="postPermiso">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="postNombreEmpleado" class="form-label">Nombre del empleado</label>
+                                <input type="text" id="postNombreEmpleado" class="form-control" placeholder="Nombre del empleado"
+                                    aria-label="Username" aria-describedby="basic-addon1" required v-model="postObjectPermiso.nombreEmpleado">
+                            </div>
+                            <div class="form-group">
+                                <label for="postApellidosEmpleado" class="form-label">Apellidos del empleado</label>
+                                <input type="text" id="postApellidosEmpleado" class="form-control"
+                                    placeholder="Apellidos del empleado" aria-label="Username" aria-describedby="basic-addon1"
+                                    required v-model="postObjectPermiso.apellidosEmpleado">
+                            </div>
+                            <div class="form-group">
+                                <label for="postFechaPermiso" class="form-label">Fecha del permiso</label>
+                                <input type="date" id="postFechaPermiso" class="form-control" placeholder="Fecha del permiso"
+                                    aria-label="Username" aria-describedby="basic-addon1" required v-model="postObjectPermiso.fechaPermiso">
+                            </div>
+                            <div class="form-group">
+                                <label for="postTipoPermiso" class="form-label">Tipo de permiso</label>
+                                <select id="postTipoPermiso" class="form-control" required v-model="postObjectPermiso.tipoPermiso">
+                                    <template v-for="ltp in listaTiposPermiso">
+                                        <option :value="ltp.id">{{ltp.descripcion}}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Registrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="modalEliminar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="exampleModalLabel">Eliminar permiso</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estas seguro de querer eliminar este registro?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-danger" v-on:click="deletePermiso()">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        <div class="modal fade" id="modalEdicion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="exampleModalLabel">Editar permiso</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form @submit.prevent="putPermiso">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="putNombreEmpleado" class="form-label">Nombre del empleado</label>
+                                <input type="text" id="putNombreEmpleado" class="form-control" placeholder="Nombre del empleado"
+                                    aria-label="Username" aria-describedby="basic-addon1" required v-model="putObjectPermiso.nombreEmpleado">
+                            </div>
+                            <div class="form-group">
+                                <label for="putApellidosEmpleado" class="form-label">Apellidos del empleado</label>
+                                <input type="text" id="putApellidosEmpleado" class="form-control"
+                                    placeholder="Apellidos del empleado" aria-label="Username" aria-describedby="basic-addon1"
+                                    required v-model="putObjectPermiso.apellidosEmpleado">
+                            </div>
+                            <div class="form-group">
+                                <label for="putFechaPermiso" class="form-label">Fecha del permiso</label>
+                                <input type="date" id="putFechaPermiso" class="form-control" placeholder="Fecha del permiso"
+                                    aria-label="Username" aria-describedby="basic-addon1" required v-model="putObjectPermiso.fechaPermiso">
+                            </div>
+                            <div class="form-group">
+                                <label for="putTipoPermiso" class="form-label">Tipo de permiso</label>
+                                <select id="putTipoPermiso" class="form-control" required v-model="putObjectPermiso.tipoPermiso">
+                                    <template v-for="ltp in listaTiposPermiso">
+                                        <option :value="ltp.id">{{ltp.descripcion}}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="src/js/Permisos.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>
